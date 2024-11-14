@@ -19,3 +19,4 @@ Códigos de error en alertas y sus mensajes:
 -Con qué frecuencia se repiten los VINs ? De 999 registros, 563 son renglones que se repiten, haciendo que se consultaran en total solo 580 VINs distintos. La enorme mayoría de estos son VINs que no lanzaron alertas (520 registros de VINs sin alerta y 43 con alerta) *¿por qué?
 -¿Los vins que no emiten alerta siempre proporcionan la misma información?
 -¿Los vins que emiten alerta siempre proporcionan la misma información y la misma alerta?
+-¿Cuál es el tiempo de diferencia entre registros de vins repetidos?
