@@ -3,7 +3,8 @@
 /.ipynb_checkpoints
 
 #database
-consultassec
+*.csv
+
 
 #pdf-layout
-Conectividad REPUVE-CARFAX MX - Regularizacion - v1 (1 de Diciembre)
+*.pdf
