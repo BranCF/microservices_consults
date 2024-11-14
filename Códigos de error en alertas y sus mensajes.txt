@@ -1,0 +1,21 @@
+Códigos de error en alertas y sus mensajes:
+
+*Código 1: "El VIN proporcionado 2 tiene menos de 17 caracteres. (n)"
+*Código 2: ""
+*Código 3: "No se puede determinar el país de origen."
+*Código 4: "El dígito verificador en la 9° posición del VIN ----------------- NO es correcto."
+*Código 5: "La diferencia entre el año modelo del vehículo y el año de la fecha de consulta es mayor a 5 años."
+*Código 6: "El VIN ----------------- cuenta con reporte de robo en Estados Unidos o Canadá. Es importante tener presente que aunque el vehículo haya sido recuperado y entregado al propietario, el trámite aún no ha sido concluido por la autoridad competente en aquellos países, por lo que el estatus continúa siendo robado. Información proporcionada por la empresa CARFAX. Para cualquier duda por favor envíe un correo a: soporte@carfaxmx.com.mx"
+*Código 7: "El VIN ----------------- no cuenta con registros de cirulación en Estados Unidos o Canadá. Información proporcionada por la empresa CARFAX. Para cualquier duda por favor envíe un correo a: soporte@carfaxmx.com.mx"
+
+
+
+-Checar ip's
+-Hacer conteo de vin's
+-Los códigos de forma aún desglosan información ?
+-Para qué son las columnas que tienen la misma información o que no contienen información
+-Se puede cambiar la forma del objeto ? 
+-Por qué hay menos renglones con alertas de los que tienen errores en CarfaxUsa ? No hay menos renglones, solo que algunos mensajes con errores se repiten sumando los debidos.
+-Con qué frecuencia se repiten los VINs ? De 999 registros, 563 son renglones que se repiten, haciendo que se consultaran en total solo 580 VINs distintos. La enorme mayoría de estos son VINs que no lanzaron alertas (520 registros de VINs sin alerta y 43 con alerta) *¿por qué?
+-¿Los vins que no emiten alerta siempre proporcionan la misma información?
+-¿Los vins que emiten alerta siempre proporcionan la misma información y la misma alerta?
