@@ -12,11 +12,20 @@ Códigos de error en alertas y sus mensajes:
 
 -Checar ip's
 -Hacer conteo de vin's
--Los códigos de forma aún desglosan información ?
--Para qué son las columnas que tienen la misma información o que no contienen información
--Se puede cambiar la forma del objeto ? 
--Por qué hay menos renglones con alertas de los que tienen errores en CarfaxUsa ? No hay menos renglones, solo que algunos mensajes con errores se repiten sumando los debidos.
--Con qué frecuencia se repiten los VINs ? De 999 registros, 563 son renglones que se repiten, haciendo que se consultaran en total solo 580 VINs distintos. La enorme mayoría de estos son VINs que no lanzaron alertas (520 registros de VINs sin alerta y 43 con alerta) *¿por qué?
--¿Los vins que no emiten alerta siempre proporcionan la misma información?
--¿Los vins que emiten alerta siempre proporcionan la misma información y la misma alerta?
--¿Cuál es el tiempo de diferencia entre registros de vins repetidos?
+*Los códigos que corrigen la forma del VIN aún desglosan información?
+-Checar si existe información aún con alguna alerta.
+*Para qué son las columnas que tienen la misma información o que no contienen información?
+-Preguntar y analizar o eliminar de ser necesario
+*Se puede cambiar la forma del objeto de respuesta?
+-Preguntar y trabajar mediante interfaces o en su defecto, mantenérselos listos para cualquier cambio de forma 
+*Con qué frecuencia se repiten los VINs ? De 999 registros, 563 son renglones que se repiten, haciendo que se consultaran en total solo 580 VINs distintos. La enorme mayoría de estos son VINs que no lanzaron alertas (520 registros de VINs sin alerta y 43 con alerta) 
+*¿por qué?
+-Preguntar acerca del proceso de regularización y ver algún fallo
+*¿Los vins que no emiten alerta siempre proporcionan la misma información?
+-Identificar si los  VINS repetidos siempre contienen la misma información
+*¿Los vins que emiten alerta siempre proporcionan la misma información y la misma alerta?
+-Identificar si los  VINS repetidos siempre contienen la misma información de alerta y de contenido
+*¿Cuál es el tiempo de diferencia entre registros de vins repetidos?
+-Obtener la diferencia entre VINs repetidos para poder determinar la razón por la que se repiten
+-Crear un promedio de la cantidad de registros, registros que emiten alerta, registros que no lo emiten, conteo de cada código que aparézcales, etc, que se obtienen cada 10 min, 20, 30, 1 hora, 3, 6 12 y 24 horas
+-Crear un análisis de los registro s por tiempo dado el día de la semana, día festivo, fin de semana.
