@@ -29,3 +29,6 @@ Códigos de error en alertas y sus mensajes:
 -Obtener la diferencia entre VINs repetidos para poder determinar la razón por la que se repiten
 -Crear un promedio de la cantidad de registros, registros que emiten alerta, registros que no lo emiten, conteo de cada código que aparézcales, etc, que se obtienen cada 10 min, 20, 30, 1 hora, 3, 6 12 y 24 horas
 -Crear un análisis de los registro s por tiempo dado el día de la semana, día festivo, fin de semana.
+-Migrar los datos a una base de datos de postgresql o de mysql, empezar a hacer las peticiones a esa base de datos para hacer el análisis
+-Empezar a hacer la conexión a una api o webhook para dar avisos (por WhatsApp, por ejemplo)
+-
