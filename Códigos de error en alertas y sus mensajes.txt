@@ -1,7 +1,7 @@
 Códigos de error en alertas y sus mensajes:
 
 *Código 1: "El VIN proporcionado 2 tiene menos de 17 caracteres. (n)"
-*Código 2: ""
+*Código 2: "El VIN ----------------- no corresponde al de fabricación o ensamble del vehículo en Norteamérica, Europa o Asia."
 *Código 3: "No se puede determinar el país de origen."
 *Código 4: "El dígito verificador en la 9° posición del VIN ----------------- NO es correcto."
 *Código 5: "La diferencia entre el año modelo del vehículo y el año de la fecha de consulta es mayor a 5 años."
