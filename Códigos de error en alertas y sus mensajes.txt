@@ -32,3 +32,5 @@ Códigos de error en alertas y sus mensajes:
 -Migrar los datos a una base de datos de postgresql o de mysql, empezar a hacer las peticiones a esa base de datos para hacer el análisis
 -Empezar a hacer la conexión a una api o webhook para dar avisos (por WhatsApp, por ejemplo)
 -Saber cuál es la diferencia entre los registros que contienen el campo VHR en sus CarfaxUsaData
+*¿Qué horas/días presentan más atraso en el microservicio?
+
