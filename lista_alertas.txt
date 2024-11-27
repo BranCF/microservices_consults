@@ -1,0 +1,17 @@
+Matriz de escalamiento
+-Que el response body siempre tenga los mismos formatos *
+-Que CarfaxUsaData siempre tenga los mismos formatos *
+-Que requestParameters nunca tenga valores, apikey, 200. 
+1.- Alerta por igual o más de dos peticiones con una API key distinta a la establecida.
+2.- Alerta por más de (50) VINs por IP (?)
+3.- Alerta por igual o más de dos peticiones con reponseCode igual a 500, 502, 504. (401 por volumen)
+4.- Alerta por igual o mas de n porcentaje de peticiones con alguna alerta.
+5.- Alerta por igual o más de 2 peticiones con más de 6 segundos de tardanza entre requestTime y responseTime.
+6.- Alerta por igual o más de p peticiones a una hora de un día determinado.
+7.- Alerta por igual o menos de t peticiones a una hora de un día determinado.
+8.- Alerta por inconsistencia entre mensaje 'carfaxUsaData' y columna 'alertas'.
+9.- Alerta por VINs que contengan alerta distinta al código 4 y que contengan otra alerta o ninguna en el mismo periodo de tiempo corto (10 min hasta 1 hora).
+10.- Alerta por igual o más de k porcentaje de peticiones con firewallUsa igual a 1.
+
+ssl
+certificados
