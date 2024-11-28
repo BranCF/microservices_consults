@@ -6,6 +6,10 @@
 #environment variables
 .env
 
+#database administrator
+docker-compose.yml
+my.cnf
+
 #database
 *.csv
 
