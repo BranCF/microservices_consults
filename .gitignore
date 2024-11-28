@@ -1,6 +1,10 @@
 #virtual environment
 /msvenv1
 /.ipynb_checkpoints
+/certificates
+
+#environment variables
+.env
 
 #database
 *.csv
