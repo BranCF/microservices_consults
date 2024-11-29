@@ -1,4 +1,3 @@
-# Use root/example as user/password credentials
 version: "3.1"
 
 services:
@@ -14,4 +13,19 @@ services:
             - ./my.cnf:/etc/my.cnf
         ports:
             - 3306:3306
-        # (this is just an example, not intended to be a production configuration)
+
+    db2:
+        image: mongo:6.0
+        container_name: mongo_ssl
+        restart: always
+        ports:
+            - "27017:27017" # Expose MongoDB on port 27017
+        volumes:
+            - ./certificados/server.pem:/etc/ssl/mongo/server.pem
+            - ./certificados/ca.crt:/etc/ssl/mongo/ca.crt
+            - ./certificados/internalClient.pem:/etc/ssl/mongo/internalClient.pem
+            - ./certificados/mongod.conf:/etc/mongod.conf
+        command: ["mongod", "--config", "/etc/mongod.conf"]
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: password
