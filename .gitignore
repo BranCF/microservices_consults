@@ -2,6 +2,8 @@
 /msvenv1
 /.ipynb_checkpoints
 /certificates
+/certificados
+/mongo-connection
 
 #environment variables
 .env
