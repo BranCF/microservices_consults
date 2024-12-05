@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 import pymysql.cursors
 import datetime
 import telegram
+#import time
 import asyncio
 
 
@@ -216,7 +217,7 @@ async def distinctValueVin(regularizationFrame):
     Returns:
     '''
     differentResponses = verifyInfoRepeatedVins(regularizationFrame)['differentResponses']
-    responsesKeys = differentResponses.keys()
+    responsesKeys = list(differentResponses.keys())
     
     if len(responsesKeys) == 1:
         message = f'Alerta media {nombreMicroservicio}: Existe VIN con distintos valores para una consulta{responsesKeys[0]}:{differentResponses[responsesKeys[0]]}'
@@ -240,11 +241,14 @@ def proveErrorAlert(df):
     conError = 0
     conErrorSinAlerta = 0
     for index1 in range(len(carfaxUsaData)):
-        carfaxDict = json.loads(carfaxUsaData[index1])
-        if 'error' in list(carfaxDict.keys()):
-            conError += 1
-            if df.iloc[index1]['alertas'] == []:
-                conErrorSinAlerta+=1
+        try:
+            carfaxDict = json.loads(carfaxUsaData[index1])
+            if 'error' in list(carfaxDict.keys()):
+                conError += 1
+                if df.iloc[index1]['alertas'] == []:
+                    conErrorSinAlerta+=1
+        except:
+            print(df.iloc[index1]['_id']+': '+ carfaxUsaData[index1])
     return conErrorSinAlerta
 
 async def carfaxAlertsRelation(regularizationFrame, maxCarfaxAlerts):
@@ -327,25 +331,33 @@ async def recordsAlerts(regularizationFrame, meanStdRecords, lastTimeSub, n_minu
     
     recordsNumber = regularizationFrame.shape[0]
     
-    if recordsNumber> maxRecords and recordsNumber/maxRecords < 2:
-        message = f'Alerta media {nombreMicroservicio} de cantidad de registros. Se registran más de {maxRecords} para la hora: {recordsNumber}'
-        await send_telegram_message(message, chat_id_yellow)
-    elif recordsNumber/maxRecords >= 2:
-        message = f'Alerta alta {nombreMicroservicio} de cantidad de registros. Se registran más de {maxRecords} para la hora: {recordsNumber}'
-        await send_telegram_message(message, chat_id_red)
+    if recordsNumber != 0:
+        if recordsNumber> maxRecords and recordsNumber/maxrecords < 2:
+            message = f'Alerta media {nombreMicroservicio} de cantidad de registros. Se registran más de {maxRecords} para la hora: {recordsNumber}'
+            await send_telegram_message(message, chat_id_yellow)
+        elif recordsNumber/maxRecords >= 2:
+            message = f'Alerta alta {nombreMicroservicio} de cantidad de registros. Se registran más de {maxRecords} para la hora: {recordsNumber}'
+            await send_telegram_message(message, chat_id_red)
+        else:
+            message = f'Sin alerta {nombreMicroservicio}. El tráfico no rebasa la cota superior.'
+            await send_telegram_message(message, chat_id_green)
+            
+        if recordsNumber< minRecords and minRecords/recordsNumber < 2:
+            message = f'Alerta media {nombreMicroservicio} de cantidad de registros. Se registran menos de {minRecords} para la hora: {recordsNumber}'
+            await send_telegram_message(message, chat_id_yellow)
+        elif minRecords/recordsNumber >= 2:
+            message = f'Alerta alta {nombreMicroservicio} de cantidad de registros. Se registran menos de {minRecords} para la hora: {recordsNumber}'
+            await send_telegram_message(message, chat_id_red)
+        else:
+            message = f'Sin alerta {nombreMicroservicio}. El tráfico no rebasa la cota inferior.'
+            await send_telegram_message(message, chat_id_green) 
     else:
-        message = f'Sin alerta {nombreMicroservicio}. El tráfico no rebasa la cota superior.'
-        await send_telegram_message(message, chat_id_green)
-        
-    if recordsNumber< minRecords and minRecords/recordsNumber < 2:
-        message = f'Alerta media {nombreMicroservicio} de cantidad de registros. Se registran menos de {minRecords} para la hora: {recordsNumber}'
-        await send_telegram_message(message, chat_id_yellow)
-    elif minRecords/recordsNumber >= 2:
-        message = f'Alerta alta {nombreMicroservicio} de cantidad de registros. Se registran menos de {minRecords} para la hora: {recordsNumber}'
-        await send_telegram_message(message, chat_id_red)
-    else:
-        message = f'Sin alerta {nombreMicroservicio}. El tráfico no rebasa la cota inferior.'
-        await send_telegram_message(message, chat_id_green) 
+        if recordsNumber< minRecords:
+            message = f'Alerta media {nombreMicroservicio} de cantidad de registros. Se registran menos de {minRecords} para la hora: {recordsNumber}'
+            await send_telegram_message(message, chat_id_yellow)
+        else:
+            message = f'Sin alerta {nombreMicroservicio}. El tráfico no rebasa la cota inferior.'
+            await send_telegram_message(message, chat_id_green)
 
 def calculateDeltaTime(df, columnA, columnB):
     '''
@@ -373,7 +385,7 @@ async def delayAlerts(regularizationFrame, maxCountDelay):
         maxCountDelay (int): Max number of allowed slow records
     Returns:
     '''
-    timeFrame = calculateDeltaTime(regularizationFrame[(regularizationFrame['responseTime']!='xD')&(regularizationFrame['requestTime']!='xD')], 'responseTime', 'requestTime')
+    timeFrame = calculateDeltaTime(regularizationFrame[(regularizationFrame['responseTime']!=None)&(regularizationFrame['requestTime']!=None)], 'responseTime', 'requestTime')
     
     timeMax = timeFrame['secondsDifference'].max()
     
@@ -387,7 +399,7 @@ async def delayAlerts(regularizationFrame, maxCountDelay):
         if count == maxCountDelay:
             message = f'Alerta media {nombreMicroservicio} de lentitud: {count} registros lentos'
             await send_telegram_message(message, chat_id_yellow)
-        elif count >maxCountDelay:
+        elif count > maxCountDelay:
             message = f'Alerta alta {nombreMicroservicio} de lentitud: {count} registros lentos'
             await send_telegram_message(message, chat_id_red)
     else:
@@ -434,7 +446,7 @@ async def ipAlerts(regularizationFrame, ipMaximum):
         .reset_index()  
         .rename(columns={'VIN': 'count'})  
     )
-    ipsMax = int(ips_vins_frame['count'].max())
+    ipsMax = float(ips_vins_frame['count'].max())
     suspiciousIps = list(ips_vins_frame[ips_vins_frame['count'] == ipsMax]['ip'])
     if ipsMax > ipMaximum:
         message = f'Alerta media {nombreMicroservicio} de ips que checan más de 20 VINs distintos {suspiciousIps} con cantidad: {ipsMax}'
@@ -509,19 +521,16 @@ chat_id_red = os.getenv('CHAT_ID_RED')
 
 
 async def regularizationAnalysis():
-    '''
-    Executes The analysis for Regularization ms
-    '''
     await connectionHealth(connectHealth(db_config))
     
-    #lastTime = datetime.datetime.now()
-    #lastTimeSub = (datetime.datetime.now() - datetime.timedelta(minutes = n_minutes))
-    lastTime = list(getTheLastDate(db_config, view))[12]
-    lastTimeSub = (list(getTheLastDate(db_config, view))[12] - datetime.timedelta(minutes = n_minutes))
+    lastTime = datetime.datetime.now() - datetime.timedelta(hours = 6)
+    lastTimeSub = (lastTime - datetime.timedelta(minutes = n_minutes))
+    #lastTime = list(getTheLastDate(db_config, view))[12]
+    #lastTimeSub = (list(getTheLastDate(db_config, view))[12] - datetime.timedelta(minutes = n_minutes))
     
     resultQueryList = list(getTheDataframe(db_config, view, lastTimeSub.strftime('%Y-%m-%d %H:%M:%S'), lastTime.strftime('%Y-%m-%d %H:%M:%S')))
     regularizationFrame = pd.DataFrame(resultQueryList, columns = labels)
-    regularizationFrame = regularizationFrame.fillna('xD')
+    regularizationFrame = regularizationFrame.replace(np.nan, None)
     
     await ipAlerts(regularizationFrame, ipMaximum)
     
@@ -544,8 +553,8 @@ async def regularizationAnalysis():
 asyncio.run(regularizationAnalysis())
 
 #while True:
-#    await regularizationAnalysis()
-#    time.sleep(int(os.getenv('DIFFERENCE_MINUTES'))*60)
+    #await regularizationAnalysis()
+    #time.sleep(int(os.getenv('DIFFERENCE_MINUTES'))*60)
 
 
 # In[ ]:

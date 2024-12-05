@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[1]:
 
 
 import json
@@ -15,13 +15,13 @@ from pymongo.errors import ConnectionFailure
 import asyncio
 
 
-# In[ ]:
+# In[2]:
 
 
 load_dotenv();
 
 
-# In[ ]:
+# In[3]:
 
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
@@ -35,7 +35,7 @@ with open(os.getenv('MEAN_RECORDS_JSON_MONGO'), 'r') as meanRecordsByHour:
     meanStdRecords = json.load(meanRecordsByHour)
 
 
-# In[ ]:
+# In[4]:
 
 
 USERNAME = os.getenv('USER_MONGO')
@@ -48,7 +48,7 @@ CA_CERT = os.getenv('CA_CERT_MONGO')
 CLIENT_CERT = os.getenv('CLIENT_CERT_MONGO')
 
 
-# In[ ]:
+# In[5]:
 
 
 bot = telegram.Bot(token=BOT_TOKEN)
@@ -87,13 +87,13 @@ def fetch_data_from_mongo(collection, required_fields, time_field="responseTime"
     """
 
     try:
-        #max_time_doc = collection.find_one({}, {time_field: 1}, sort=[(time_field, -1)])
-        #if not max_time_doc or time_field not in max_time_doc:
-        #    print(f"No se encontró el campo '{time_field}' en la base de datos.")
-         #   return []    
-        #max_time = max_time_doc[time_field]
+        max_time_doc = collection.find_one({}, {time_field: 1}, sort=[(time_field, -1)])
+        if not max_time_doc or time_field not in max_time_doc:
+            print(f"No se encontró el campo '{time_field}' en la base de datos.")
+            return []    
+        max_time = max_time_doc[time_field]
 
-        max_time =  datetime.now()
+        #max_time =  datetime.now()
         start_time = max_time - timedelta(minutes=time_range_minutes)
         end_time = max_time
         query = {time_field: {"$gte": start_time, "$lte": end_time}}
@@ -242,7 +242,7 @@ async def counts_records(df, meanStdRecords, last_time_sub, n_minutes, nombreMic
     
     recordsNumber = df.shape[0]
     
-    if recordsNumber> maxRecords and recordsNumber/maxrecords < 2:
+    if recordsNumber> maxRecords and recordsNumber/maxRecords < 2:
         message = f'Alerta media {nombreMicroservicio} de cantidad de registros. Se registran más de {maxRecords} para la hora: {recordsNumber}'
         await send_telegram_message(message, CHAT_ID_2)
     elif recordsNumber/maxRecords >= 2:
@@ -307,8 +307,15 @@ async def main():
     await counts_records(df, meanStdRecords, last_time_sub, 10)
 
 
-# In[ ]:
+# In[7]:
 
 
 asyncio.run(main())
+#await main()
+
+
+# In[ ]:
+
+
+
 
