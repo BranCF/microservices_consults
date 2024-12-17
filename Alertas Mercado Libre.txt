@@ -1,0 +1,10 @@
+Alertas Mercado Libre: 
+
+* 3: El VIN/NIV ----------------- proporcionado no cuenta con registros en el Registro Público Vehicular (REPUVE).
+* 2: El VIN/NIV ----------------- proporcionado proporcionado no cuenta con información en las bases de datos CARFAX MX.
+* 1: La construcción del VIN/NIV ----------------- proporcionado no cumple con las normas internacionales.
+* 7: Si existe alguna duda respecto a la información proporcionada, puede contactar a la Mesa de Ayuda CARFAX MX enviando un correo electrónico con el Número de Serie a soporte@carfaxmx.com.mx
+* 6: El VIN/NIV ----------------- proporcionado vehículo fue regularizado a través del Decreto por el que se Fomenta la Regularización de Vehículos Usados de Procedencia Extranjera.
+* 4: EL VIN/NIV ----------------- proporcionado cuenta con reporte de robo en las bases de datos CARFAX MX.
+* 5: El VIN/NIV ----------------- proporcionado cuenta con reporte de recuperación en México según las bases de datos CARFAX MX.
+* 99: No fue posible integrar la información completa para la consulta del VIN/NIV ----------------- proporcionado.
