@@ -3,13 +3,17 @@ import telegram
 import pandas as pd
 from datetime import datetime
 import asyncio
+from dotenv import load_dotenv
+
+load_dotenv()
 
 bot = telegram.Bot(token=os.getenv("BOT_TOKEN"))
 CHAT_ID_GREEN = os.getenv('CHAT_ID_GREEN')
 CHAT_ID_YELLOW = os.getenv('CHAT_ID_YELLOW')
 CHAT_ID_RED = os.getenv('CHAT_ID_RED')
 
-async def send_telegram_message(message, chat_semaphore):
+
+async def send_telegram_message(message: str, chat_semaphore: str):
     """
     Send an alert message (async).
     Args:
@@ -24,68 +28,78 @@ async def send_telegram_message(message, chat_semaphore):
 
 
 class AnalysisMicroservice:
+    """
+    Class with every method for basic analysis of microservices
+    """
 
-    #Constructor
+    # Constructor
     def __init__(self, dataframe, microservice_name: str, mean_std_records: dict, analysis_dict: dict):
         self.dataframe = dataframe
         self.microservice = microservice_name
         self.mean_std_records = mean_std_records
         self.response_code_column = analysis_dict["response_code_column"]
-        self.max_code_alerts = analysis_dict["max_code_alerts"]
-        self.error_codes = analysis_dict["error_codes"]
+        self.max_code_alerts = float(analysis_dict["max_code_alerts"])
+        self.error_codes = int(analysis_dict["error_codes"])
         self.response_time_column = analysis_dict["response_time_column"]
         self.request_time_column = analysis_dict["request_time_column"]
-        self.time_maximum = analysis_dict["time_maximum"]
-        self.max_count_delay = analysis_dict["max_count_delay"]
+        self.time_maximum = int(analysis_dict["time_maximum"])
+        self.max_count_delay = float(analysis_dict["max_count_delay"])
         self.api_key = analysis_dict["api_key"]
-        self.api_key_max = analysis_dict["api_key_max"]
+        self.api_key_max = int(analysis_dict["api_key_max"])
         self.last_time_sub = analysis_dict["last_time_sub"]
-        self.n_minutes = analysis_dict["n_minutes"]
+        self.n_minutes = analysis_dict["range_minutes"]
 
     def analyse_microservice(self):
+        """
+        Analyze microservice using the methods of this class.
+        """
+        print("Analyzing microservice...")
         asyncio.run(self.http_codes_alerts())
+        print("Analyzing microservice...")
         asyncio.run(self.delay_alerts())
+        print("Analyzing microservice...")
         asyncio.run(self.api_keys_alerts())
+        print("Analyzing microservice...")
         asyncio.run(self.counts_records())
 
-    #Public
+    # Public
     async def http_codes_alerts(self):
         """
         Counts how many http error codes dataframe has
         """
-
         total_columns = len(self.dataframe[self.response_code_column])
         self.dataframe[self.response_code_column] = self.dataframe[self.response_code_column].astype(int)
         bad_codes = self.dataframe[self.dataframe[self.response_code_column] >= self.error_codes]
         bad_code_counts = bad_codes[self.response_code_column].value_counts()
-
-
+        print(bad_code_counts.items())
+        print(list(bad_code_counts))
         for code, count in bad_code_counts.items():
-            if self.max_code_alerts < count/total_columns < self.max_code_alerts+0.1:
+            print(f"{code}: {count}")
+            if self.max_code_alerts < count / total_columns < self.max_code_alerts + 0.1:
                 message = f'Alerta media {self.microservice} de errores HTTP con código {code} con {count} apariciones'
                 await send_telegram_message(message, CHAT_ID_YELLOW)
-            elif count/total_columns > self.max_code_alerts+0.1:
+            elif count / total_columns > self.max_code_alerts + 0.1:
                 message = f'Alerta alta {self.microservice} de errores HTTP con código {code} con {count} apariciones'
                 await send_telegram_message(message, CHAT_ID_RED)
-
-            if not list(bad_code_counts):
+            else:
                 message = f'Sin errores {self.microservice} de código HTTP'
                 await send_telegram_message(message, CHAT_ID_GREEN)
 
-
-    #Public
+    # Public
     async def delay_alerts(self):
         """
         Counts how many slow response records dataframe has and determines if the count is normal
         """
-        records_without_time = len(self.dataframe[self.dataframe[self.response_time_column] is None][self.response_time_column])
-        records_with_time = len(self.dataframe[self.dataframe[self.response_time_column] is not None][self.response_time_column])
-        if records_without_time>0:
+        records_without_time = len(
+            self.dataframe[self.dataframe[self.response_time_column] == 'xD'][self.response_time_column])
+        records_with_time = len(
+            self.dataframe[self.dataframe[self.response_time_column] != 'xD'][self.response_time_column])
+        if records_without_time > 0:
             message = f'Alerta media {self.microservice}: {records_without_time} registros no tienen tiempo de respuesta'
             await send_telegram_message(message, CHAT_ID_YELLOW)
 
-        dataframe = self.dataframe[(self.dataframe[self.response_time_column] is not None) & (
-                self.dataframe[self.request_time_column] is not None)]
+        dataframe = self.dataframe[(self.dataframe[self.response_time_column] != 'xD') & (
+                self.dataframe[self.request_time_column] != 'xD')]
 
         time_frame = self.calculate_delta_time(self.response_time_column, self.request_time_column)
 
@@ -98,22 +112,21 @@ class AnalysisMicroservice:
             slow_time_counts = slow_time['secondsDifference'].value_counts()
             count = int(slow_time_counts.sum())
 
-            if self.max_count_delay<count/records_with_time<self.max_count_delay+0.1:
+            if self.max_count_delay < count / records_with_time < self.max_count_delay + 0.1:
                 message = f'Alerta media {self.microservice} de lentitud: {count} registros lentos'
                 await send_telegram_message(message, CHAT_ID_YELLOW)
-            elif count/records_with_time > self.max_count_delay+0.1:
+            elif count / records_with_time > self.max_count_delay + 0.1:
                 message = f'Alerta alta {self.microservice} de lentitud: {count} registros lentos'
                 await send_telegram_message(message, CHAT_ID_RED)
         else:
             message = f'Sin alerta {self.microservice} de lentitud'
             await send_telegram_message(message, CHAT_ID_GREEN)
 
-    #Public
+    # Public
     async def api_keys_alerts(self):
         """
         Counts how many different apiKey records dataframe has and determines if the count is normal
         """
-
         bad_api_keys = self.dataframe[self.dataframe['apiKey'] != self.api_key]
 
         bad_api_counts = bad_api_keys['apiKey'].value_counts()
@@ -134,9 +147,7 @@ class AnalysisMicroservice:
         """
         Counts how many records dataframe has and determines if the count is normal
         """
-
-
-        date_object = datetime.strptime(str(self.last_time_sub), "%Y-%m-%d %H:%M:%S.%f")
+        date_object = datetime.strptime(str(self.last_time_sub), "%Y-%m-%d %H:%M:%S")
 
         day_name = date_object.strftime("%A")
         hour = date_object.hour
@@ -160,33 +171,34 @@ class AnalysisMicroservice:
 
         records_number = self.dataframe.shape[0]
 
-        if records_number > max_records and records_number / max_records < 2:
-            message = f'Alerta media {self.microservice} de cantidad de registros. Se registran más de {max_records} para la hora: {records_number}'
-            await send_telegram_message(message, CHAT_ID_YELLOW)
-        elif records_number / max_records >= 2:
-            message = f'Alerta alta {self.microservice} de cantidad de registros. Se registran más de {max_records} para la hora: {records_number}'
-            await send_telegram_message(message, CHAT_ID_RED)
-        else:
-            message = f'Sin alerta {self.microservice}. El tráfico no rebasa la cota superior.'
-            await send_telegram_message(message, CHAT_ID_GREEN)
+        if records_number != 0:
+            if records_number > max_records and records_number / max_records < 2:
+                message = f'Alerta media {self.microservice} de cantidad de registros. Se registran más de {max_records} para la hora: {records_number}'
+                await send_telegram_message(message, CHAT_ID_YELLOW)
+            elif records_number / max_records >= 2:
+                message = f'Alerta alta {self.microservice} de cantidad de registros. Se registran más de {max_records} para la hora: {records_number}'
+                await send_telegram_message(message, CHAT_ID_RED)
+            else:
+                message = f'Sin alerta {self.microservice}. El tráfico no rebasa la cota superior: {records_number}'
+                await send_telegram_message(message, CHAT_ID_GREEN)
 
-        if records_number < min_records and min_records / records_number < 2:
-            message = f'Alerta media {self.microservice} de cantidad de registros. Se registran menos de {min_records} para la hora: {records_number}'
-            await send_telegram_message(message, CHAT_ID_YELLOW)
-        elif min_records / records_number >= 2:
-            message = f'Alerta alta {self.microservice} de cantidad de registros. Se registran menos de {min_records} para la hora: {records_number}'
-            await send_telegram_message(message, CHAT_ID_RED)
-        else:
-            message = f'Sin alerta {self.microservice}. El tráfico no rebasa la cota inferior.'
-            await send_telegram_message(message, CHAT_ID_GREEN)
+            if records_number < min_records and min_records / records_number < 2:
+                message = f'Alerta media {self.microservice} de cantidad de registros. Se registran menos de {min_records} para la hora: {records_number}'
+                await send_telegram_message(message, CHAT_ID_YELLOW)
+            elif min_records / records_number >= 2:
+                message = f'Alerta alta {self.microservice} de cantidad de registros. Se registran menos de {min_records} para la hora: {records_number}'
+                await send_telegram_message(message, CHAT_ID_RED)
+            else:
+                message = f'Sin alerta {self.microservice}. El tráfico no rebasa la cota inferior: {records_number}'
+                await send_telegram_message(message, CHAT_ID_GREEN)
 
-    #Private
+    # Private
     def calculate_delta_time(self, column_a, column_b):
         """
         Converts column_a and column_b in datetime type and makes the difference between both columns
         Args:
            column_a (string) : Minuend column
-           column_b (string): Substrate column
+           column_b (string): Subtracting column
         Returns:
            responsePeriod (DataFrame): Returns a column named 'secondsDifference' of the seconds difference as a dataframe
         """
